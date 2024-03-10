@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"database/sql"
@@ -6,22 +6,14 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	"github.com/shahin-bayat/go-api/internal/model"
 )
 
-type Storage interface {
-	CreateAccount(*Account) error
-	DeleteAccount(int) error
-	UpdateAccount(*Account) error
-	GetAccounts() ([]*Account, error)
-	GetAccountById(int) (*Account, error)
-	GetAccountByIban(string) (*Account, error)
-}
-
-type PostgresStorage struct {
+type PostgresStore struct {
 	db *sql.DB
 }
 
-func NewPostgresStorage() (*PostgresStorage, error) {
+func NewPostgresStore() (*PostgresStore, error) {
 	// https://pkg.go.dev/github.com/lib/pq
 	// from docker: docker run --name postgres -e POSTGRES_PASSWORD=goapi -p 5432:5432 -d postgres
 	connStr := "user=postgres dbname=postgres password=goapi sslmode=disable"
@@ -34,15 +26,15 @@ func NewPostgresStorage() (*PostgresStorage, error) {
 		log.Fatal(err)
 	}
 
-	return &PostgresStorage{db: db}, nil
+	return &PostgresStore{db: db}, nil
 
 }
 
-func (s *PostgresStorage) Init() error {
+func (s *PostgresStore) Init() error {
 	return s.CreateAccountTable()
 }
 
-func (s *PostgresStorage) CreateAccountTable() error {
+func (s *PostgresStore) CreateAccountTable() error {
 	query := `CREATE TABLE IF NOT EXISTS account (
 		id SERIAL PRIMARY KEY,
 		first_name VARCHAR(50),
@@ -57,7 +49,7 @@ func (s *PostgresStorage) CreateAccountTable() error {
 	return err
 }
 
-func (s *PostgresStorage) CreateAccount(a *Account) error {
+func (s *PostgresStore) CreateAccount(a *model.Account) error {
 	query := `
 	INSERT INTO account 
 	(first_name, last_name, iban, encrypted_password, balance, created_at)
@@ -71,21 +63,21 @@ func (s *PostgresStorage) CreateAccount(a *Account) error {
 	return nil
 }
 
-func (s *PostgresStorage) DeleteAccount(id int) error {
+func (s *PostgresStore) DeleteAccount(id int) error {
 	_, err := s.db.Exec("DELETE FROM account WHERE id = $1", id)
 	return err
 }
 
-func (s *PostgresStorage) UpdateAccount(a *Account) error {
+func (s *PostgresStore) UpdateAccount(a *model.Account) error {
 	return nil
 }
 
-func (s *PostgresStorage) GetAccounts() ([]*Account, error) {
+func (s *PostgresStore) GetAccounts() ([]*model.Account, error) {
 	rows, err := s.db.Query("SELECT * FROM account")
 	if err != nil {
 		return nil, err
 	}
-	accounts := []*Account{}
+	accounts := []*model.Account{}
 	for rows.Next() {
 		account, err := scanIntoAccount(rows)
 		if err != nil {
@@ -96,7 +88,7 @@ func (s *PostgresStorage) GetAccounts() ([]*Account, error) {
 	return accounts, nil
 }
 
-func (s *PostgresStorage) GetAccountByIban(iban string) (*Account, error) {
+func (s *PostgresStore) GetAccountByIban(iban string) (*model.Account, error) {
 	rows, err := s.db.Query("SELECT * FROM account WHERE iban = $1", iban)
 	if err != nil {
 		return nil, err
@@ -107,7 +99,7 @@ func (s *PostgresStorage) GetAccountByIban(iban string) (*Account, error) {
 	return nil, fmt.Errorf("account with iban %s not found", iban)
 }
 
-func (s *PostgresStorage) GetAccountById(id int) (*Account, error) {
+func (s *PostgresStore) GetAccountById(id int) (*model.Account, error) {
 	rows, err := s.db.Query("SELECT * FROM account WHERE id = $1", id)
 	if err != nil {
 		return nil, err
@@ -118,8 +110,8 @@ func (s *PostgresStorage) GetAccountById(id int) (*Account, error) {
 	return nil, fmt.Errorf("account %d not found", id)
 }
 
-func scanIntoAccount(rows *sql.Rows) (*Account, error) {
-	account := new(Account)
+func scanIntoAccount(rows *sql.Rows) (*model.Account, error) {
+	account := new(model.Account)
 	err := rows.Scan(
 		&account.ID,
 		&account.FirstName,

@@ -1,13 +1,16 @@
 APP_NAME = go_api
-
+BUILD_DIR = ./bin
+MAIN_FILE = ./cmd/api-server/main.go
 
 build:
-	@go build -o ./bin/$(APP_NAME)
-run: build
-	@./bin/$(APP_NAME)
-test:
-	@go test -v ./... 
+	@go build -o $(BUILD_DIR)/$(APP_NAME) $(MAIN_FILE)
 
-# add a seed @go build -o ./bin/$(APP_NAME) --seed true script
+run: build
+	@$(BUILD_DIR)/$(APP_NAME)
+
+test:
+	@go test -v ./...
+
+# Add a seed target
 seed: build
-	@./bin/$(APP_NAME) --seed
+	@$(BUILD_DIR)/$(APP_NAME) --seed

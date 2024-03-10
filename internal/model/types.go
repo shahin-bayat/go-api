@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"fmt"
@@ -8,11 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type TransferRequest struct {
-	Iban   string `json:"iban"`
-	Amount int64  `json:"amount"`
-}
-
 type Account struct {
 	ID                int       `json:"id"`
 	FirstName         string    `json:"firstName"`
@@ -21,6 +16,16 @@ type Account struct {
 	EncryptedPassword string    `json:"-"`
 	Balance           int64     `json:"balance"`
 	CreatedAt         time.Time `json:"createdAt"`
+}
+
+type TransferRequest struct {
+	Iban   string `json:"iban"`
+	Amount int64  `json:"amount"`
+}
+
+func (a *Account) ValidatePassword(pw string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(a.EncryptedPassword), []byte(pw))
+	return err == nil
 }
 
 type CreateAccountRequest struct {
@@ -53,9 +58,4 @@ func NewAccount(firstName, lastName, password string) (*Account, error) {
 
 func generateIBAN() string {
 	return fmt.Sprintf("DE%02d%04d%04d%04d%04d%04d", rand.Intn(100), rand.Intn(10000), rand.Intn(10000), rand.Intn(10000), rand.Intn(10000), rand.Intn(10000))
-}
-
-func (a *Account) validatePassword(pw string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(a.EncryptedPassword), []byte(pw))
-	return err == nil
 }
