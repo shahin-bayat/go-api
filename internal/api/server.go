@@ -3,21 +3,21 @@ package api
 import (
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 func (s *APIServer) Run() {
 	// go get github.com/gorilla/mux
-	router := mux.NewRouter()
+	// router := mux.NewRouter()
 
-	router.HandleFunc("/login", makeHttpHandleFunc(s.handleLogin)).Methods("POST")
-	router.HandleFunc("/account", makeHttpHandleFunc(s.handleGetAccount)).Methods("GET")
-	router.HandleFunc("/account/{id}", withJwtAuth(makeHttpHandleFunc(s.handleGetAccountById), s.store)).Methods("GET")
-	router.HandleFunc("/account", makeHttpHandleFunc(s.handleCreateAccount)).Methods("POST")
-	router.HandleFunc("/account/{id}", makeHttpHandleFunc(s.handleDeleteAccount)).Methods("DELETE")
-	router.HandleFunc("/transfer", makeHttpHandleFunc(s.handleTransfer)).Methods("POST")
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("POST /login", makeHttpHandleFunc(s.handleLogin))
+	mux.HandleFunc("GET /account", makeHttpHandleFunc(s.handleGetAccount))
+	mux.HandleFunc("GET /account/{id}", withJwtAuth(makeHttpHandleFunc(s.handleGetAccountById), s.store))
+	mux.HandleFunc("POST /account", makeHttpHandleFunc(s.handleCreateAccount))
+	mux.HandleFunc("DELETE /account/{id}", withJwtAuth(makeHttpHandleFunc(s.handleDeleteAccount), s.store))
+	mux.HandleFunc("POST /transfer", makeHttpHandleFunc(s.handleTransfer))
 
 	log.Println("Starting server on port: ", s.listenAddr)
-	http.ListenAndServe(s.listenAddr, router)
+	log.Fatal(http.ListenAndServe(s.listenAddr, mux))
 }

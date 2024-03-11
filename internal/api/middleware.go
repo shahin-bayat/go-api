@@ -23,7 +23,7 @@ func withJwtAuth(handleFunc http.HandlerFunc, s store.Store) http.HandlerFunc {
 
 		userId, err := util.GetId(r)
 		if err != nil {
-			util.WriteJSON(w, http.StatusUnauthorized, ApiError{Error: "permission denied"})
+			util.WriteJSON(w, http.StatusUnauthorized, ApiError{Error: err.Error()})
 			return
 		}
 

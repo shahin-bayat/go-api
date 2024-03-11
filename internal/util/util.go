@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
 )
 
 func GetId(r *http.Request) (int, error) {
-	var idStr = mux.Vars(r)["id"]
+	idStr := r.PathValue("id")
+	if idStr == "" {
+		return 0, fmt.Errorf("id not found")
+	}
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return id, fmt.Errorf("invalid id: %s", idStr)
