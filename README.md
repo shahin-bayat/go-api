@@ -22,8 +22,8 @@ go-crud-api
 │       └── middleware.go
 │       └── server.go
 │   └── model
-│       └── types.go
-│       └── types_test.go
+│       └── model.go
+│       └── model_test.go
 ├── store
 │   └── postgres.go
 │   └── store.go
