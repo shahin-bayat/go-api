@@ -68,8 +68,17 @@ func (s *PostgresStore) DeleteAccount(id int) error {
 	return err
 }
 
-func (s *PostgresStore) UpdateAccount(a *model.Account) error {
-	return nil
+func (s *PostgresStore) UpdateAccount(id int, a *model.Account) (*model.Account, error) {
+	query := `
+	UPDATE account 
+	SET first_name = $1, last_name = $2, iban = $3, encrypted_password = $4, balance = $5, created_at = $6
+	WHERE id = $7
+	`
+	_, err := s.db.Exec(query, a.FirstName, a.LastName, a.IBAN, a.EncryptedPassword, a.Balance, a.CreatedAt, id)
+	if err != nil {
+		return nil, err
+	}
+	return s.GetAccountById(id)
 }
 
 func (s *PostgresStore) GetAccounts() ([]*model.Account, error) {

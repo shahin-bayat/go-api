@@ -77,6 +77,39 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	return util.WriteJSON(w, http.StatusCreated, account)
 
 }
+
+func (s *APIServer) handleUpdateAccount(w http.ResponseWriter, r *http.Request) error {
+
+	id, err := util.GetId(r)
+	if err != nil {
+		return err
+	}
+
+	req := &model.UpdateAccountRequest{}
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(req); err != nil {
+		return err
+	}
+
+	currentAcc, err := s.store.GetAccountById(id)
+	if err != nil {
+		return err
+	}
+
+	account, err := model.UpdateAccount(currentAcc, req)
+	if err != nil {
+		return err
+	}
+
+	updatedAcc, err := s.store.UpdateAccount(id, account)
+	if err != nil {
+		return err
+	}
+
+	return util.WriteJSON(w, http.StatusOK, updatedAcc)
+}
+
 func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
 	id, err := util.GetId(r)
 	if err != nil {
