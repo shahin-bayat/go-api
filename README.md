@@ -1,4 +1,4 @@
-# Go CRUD API
+# Go RESTful API
 
 This is a simple CRUD API (simple Bank account) using Go and Postgres. It allows you to create, read, update and delete accounts, also utilizes jwt to authenticate users. .
 
