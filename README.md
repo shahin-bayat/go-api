@@ -1,6 +1,6 @@
 # Go RESTful API
 
-This is a simple CRUD API (simple Bank account) using Go and Postgres. It allows you to create, read, update and delete accounts, also utilizes jwt to authenticate users. .
+This is a simple RESTful API (simple Bank account) using Go and Postgres. It allows you to create, read, update and delete accounts, also utilizes jwt to authenticate users.
 
 The folder structure I used inspired by [golang documentation](https://go.dev/doc/modules/layout)
 
